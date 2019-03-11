@@ -30,8 +30,15 @@ class DomeService(DeviceService):
     # SHOULD BE IMPLEMENTED HERE ONLY THE RESOURCES WHICH CANNOT BE EASILY QUERIED ONTO
     # THE ASCOM DRIVER USING REFLECTION AT THE DeviceService LEVEL.
 
-    @get(_path="/{device_type}/{device_number}/shutterstate", _types=[str, str], _produces=mediatypes.APPLICATION_JSON)
+    @get(_path="/api/v1/{device_type}/{device_number}/shutterstatus", _types=[str, str], _produces=mediatypes.APPLICATION_JSON)
     def getShutterState(self, device_type, device_number):
-        # TODO return ascom driver's shutterstate property value
+        super().getResource(device_type, device_number, "ShutterStatus")
 
-        pass
+    @put(_path="/api/v1/{device_type}/{device_number}/openshutter", _types=[str, str], _produces=mediatypes.APPLICATION_JSON)
+    def openShutter(self, device_type, device_number):
+        super().getResource(device_type, device_number, "OpenShutter")
+
+    @put(_path="/api/v1/{device_type}/{device_number}/closeshutter", _types=[str, str], _produces=mediatypes.APPLICATION_JSON)
+    def closeShutter(self, device_type, device_number):
+        super().getResource(device_type, device_number, "CloseShutter")
+

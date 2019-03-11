@@ -1,6 +1,6 @@
 import logging
 
-from DeviceInterfaces.IAscomDriver import IAscomDriver
+from .DeviceInterfaces.IAscomDriver import IAscomDriver
 
 
 class MyDeviceDriver(IAscomDriver):

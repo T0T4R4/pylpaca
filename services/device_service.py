@@ -17,23 +17,103 @@
 # -*- coding: utf-8 -*-
 
 import tornado.ioloop
+from tornado.httputil import parse_body_arguments
+
 import pyrestful.rest
+import json
 
 from pyrestful import mediatypes
 from pyrestful.rest import get, post, put, delete
 
+import sys
+from .config import getDriverInstance
+
+from .httpresponses import HttpSuccessResponse, HttpErrorResponse
 
 class DeviceService(pyrestful.rest.RestHandler):
 
-    def initConfig(self, config):
-        self.__config = config
+    def getResource(self, device_type, device_number, resource):
+        driver = getDriverInstance(device_type, device_number)
+        response = None
 
-    @get(_path="/{device_type}/{device_number}/{resource}", _types=[str, int, str], _produces=mediatypes.APPLICATION_JSON)
-    def getConnected(self, device_type, device_number, resource):
-        if (self.__config.driver is None):
-            raise ValueError("Driver is not present")
+        try:
+            if (driver is None):
+                raise ValueError("Driver not loaded. Check your server configuration.")
+                
+            # Dynamically call the method/property if it exists 
+            attr = getattr(driver, resource)
+            if callable(attr):
+                # might be a class instance method
+                value = attr()
+            else:
+                # might be a property
+                value = attr
+
+            response = {
+                "ClientTransactionID": 0,
+                "ServerTransactionID": 0,
+                "ErrorNumber": 0,
+                "ErrorMessage": ""
+            }
+
+            if not (value is None):
+                response["Value"] = value
+            
+            pass
+        except Exception as exc:
+            response = {
+                "Value": exc
+            }
+            self.set_status(500, exc)
+    
+        self.write(response) 
+
+        self.finish() 
+
+    def setResource(self, device_type, device_number, resource, resource_value):
+        driver = getDriverInstance(device_type, device_number)
+        response = None
+
+        try:
+            if (driver is None):
+                raise ValueError("Driver not loaded. Check your server configuration.")
+                
+            # Dynamically call the method/property if it exists 
+            setattr(driver, resource, resource_value)
+
+            response = {
+                "ClientTransactionID": 0,
+                "ServerTransactionID": 0,
+                "ErrorNumber": 0,
+                "ErrorMessage": ""
+            }
+            pass
+        except Exception as exc:
+            response = {
+                "Value": exc
+            }
+            self.set_status(500, exc)
+    
+        self.write(response) 
+
+        self.finish() 
+
+    @get(_path="/api/v1/{device_type}/{device_number}/connected", _types=[str, int, str], _produces=mediatypes.APPLICATION_JSON)
+    def getConnected(self, device_type, device_number):
+        self.getResource(device_type, device_number, "Connected")
+        
+    @put(_path="/api/v1/{device_type}/{device_number}/connected", _types=[str, int, str], _produces=mediatypes.APPLICATION_JSON)
+    def setConnected(self, device_type, device_number):
+        # read www/x-www-form-urlencoded parameters
+        
+        if self.request.headers['Content-Type'] == 'application/x-www-form-urlencoded':
+            values = {}
+            files = {}
+            parse_body_arguments('application/x-www-form-urlencoded', self.request.body, values, files)
+            value_str = values["Connected"][0].decode()
+            value = (value_str == 'True')
+            self.setResource(device_type, device_number, "Connected", value)
         else:
-            # TODO use reflection to return the driver's property value (property name should be identical to resource name)
-            raise NotImplementedError()
+            self.set_status(400, "Value error")
 
     # TODO PUT !

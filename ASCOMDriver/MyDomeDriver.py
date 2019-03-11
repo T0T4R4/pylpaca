@@ -1,6 +1,6 @@
-from DeviceInterfaces.IDomeV2 import IDomeV2
-from DeviceInterfaces.Enumerations import ShutterState
-from MyDeviceDriver import MyDeviceDriver
+from .DeviceInterfaces.IDomeV2 import IDomeV2
+from .DeviceInterfaces.Enumerations import ShutterState
+from .MyDeviceDriver import MyDeviceDriver
 
 
 class MyDomeDriver(MyDeviceDriver, IDomeV2):
