@@ -1,0 +1,10 @@
+{
+  "drivers": [
+    {
+      "device_type": "dome",
+      "device_number": 0,
+      "device_driver": "MyASCOMDomeDriver",
+      "driver_config": {}
+    }
+  ]
+}
